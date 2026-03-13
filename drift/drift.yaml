@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://download.pactflow.io/drift/schemas/drift.testcases.v1.schema.json
+drift-testcase-file: v1
+title: "Volvo API Verification"
+
+sources:
+  - name: connected-vehicle-c3-oas
+    path: ../specs/connected-vehicle-c3-specification.yaml
+  - name: energy-oas
+    path: ../specs/energy-api-specification.yaml
+  - name: location-oas
+    path: ../specs/location-specification.yaml
+  - name: functions
+    path: drift.lua
+
+plugins:
+  - name: oas
+  - name: json
+  - name: junit-output
+  - name: http-dump
+
+global:
+  connected-vehicle-auth:
+    apply: false
+    parameters:
+      headers:
+        vcc-api-key: ${env:VCC_API_KEY}
+        authorization: Bearer ${env:VCC_TOKEN}
+  energy-vehicle-auth:
+    apply: false
+    parameters:
+      headers:
+        vcc-api-key: ${env:VCC_API_KEY}
+        authorization: Bearer ${env:VCC_TOKEN}
+  location-auth:
+    apply: false
+    parameters:
+      headers:
+        vcc-api-key: ${env:VCC_API_KEY}
+        authorization: Bearer ${env:VCC_TOKEN}
+operations:
+  get_vehicles:
+    target: connected-vehicle-c3-oas:GetVehicleList
+    description: "Get vehicles"
+    include:
+      - connected-vehicle-auth
+    expected:
+      response:
+        statusCode: 200
+  location_Success:
+    target: connected-vehicle-c3-oas:GetVehicleDetails
+    description: "Get vehicle details"
+    include:
+      - connected-vehicle-auth
+    parameters:
+      path: 
+        vin: ${functions:get_global_vin}
+    expected:
+      response:
+        statusCode: 200
+
