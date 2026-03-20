@@ -6,7 +6,7 @@ local function get_global_vin()
     return global_vin
 end
 
-local function get_vin(data)
+local function process_vin_from_response(data)
 -- returns the first vin from the body if present
 -- and stores in global_vin
   if data then
@@ -28,14 +28,20 @@ end
 
 local exports = {
   event_handlers = {
+    -- this event handler allows us to introspect the response on a test case operation 
     ["operation:invoked"] = function(event, data)
-        local vin = get_vin(data)
-        print("Vin set to " .. global_vin)
+      -- Here we want store a variable from the response for use in later requests
+
+        -- data[0] is the test case operation id, which is unique
+        if data[0] == "GetVehicleList_Success" then
+          -- data[1] is the response object
+          local vin = process_vin_from_response(data[1])
+          print("Vin set to " .. global_vin)
+        end
     end
   },
   
   exported_functions = {
-    bearer_token = bearer_token,
     get_global_vin = get_global_vin
   }
 }
