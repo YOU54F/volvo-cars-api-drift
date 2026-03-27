@@ -1,13 +1,22 @@
 name: API Drift
 
 on:
-  push:
+  workflow_dispatch:
+    inputs:
+      vcc_token:
+        description: 'vcc token'
+        required: true
+        type: string
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Create VCC_TOKEN secret environment variable
+        run: |
+          VCC_TOKEN=$(jq -r '.inputs.vcc_token' $GITHUB_EVENT_PATH)
+          echo "::add-mask::$VCC_TOKEN"
 
       - name: Install drift
         run: npm install -g @pactflow/drift
@@ -22,4 +31,4 @@ jobs:
         run: drift verify --server-url https://api.volvocars.com/connected-vehicle/v2 --test-files drift/drift.yaml
         env:
           VCC_API_KEY: ${{ secrets.VCC_API_KEY }}
-          VCC_TOKEN: ${{ secrets.VCC_TOKEN }}
+          VCC_TOKEN: ${{ env.VCC_TOKEN }}
