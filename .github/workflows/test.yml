@@ -10,7 +10,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [
+            ubuntu-latest,
+            ubuntu-22.04-arm,
+            windows-latest,
+            windows-11-arm,
+            macos-15-intel,
+            macos-15
+          ]      
     steps:
       - uses: actions/checkout@v6
       - name: Create VCC_TOKEN secret environment variable
@@ -19,8 +30,21 @@ jobs:
           echo "::add-mask::$VCC_TOKEN"
           echo VCC_TOKEN=$VCC_TOKEN >> $GITHUB_ENV
 
-      - name: Install drift
-        run: npm install -g @pactflow/drift
+      - name: Download and install Drift
+        if: matrix.os != 'windows-11-arm'
+        run: |
+          npm install -g @pactflow/drift
+
+
+      - name: Download and install Drift (win-arm64) # no native win-arm64 drift builds
+        if: matrix.os == 'windows-11-arm'
+        shell: pwsh
+        run: |
+          $driftPath = "$env:TEMP\drift"
+          New-Item -ItemType Directory -Force -Path $driftPath | Out-Null
+          Invoke-WebRequest -Uri "https://download.pactflow.io/drift/latest/windows-x86_64.tgz" -OutFile "$env:TEMP\drift.tgz"
+          tar -xz -C $driftPath -f "$env:TEMP\drift.tgz"
+          Add-Content $env:GITHUB_PATH $driftPath
 
       - name: Authenticate drift
         run: drift auth login
