@@ -73,7 +73,10 @@ jobs:
           luarocks install dkjson
 
       - name: Run Drift tests
-        run: drift verify --server-url https://api.volvocars.com/connected-vehicle/v2 --test-files drift/drift.yaml --log-level debug
+        shell: bash
+        run: |
+          eval $(luarocks path)
+          drift verify --server-url https://api.volvocars.com/connected-vehicle/v2 --test-files drift/drift.yaml --log-level debug
         env:
           VCC_API_KEY: ${{ secrets.VCC_API_KEY }}
           VCC_TOKEN: ${{ env.VCC_TOKEN }}
