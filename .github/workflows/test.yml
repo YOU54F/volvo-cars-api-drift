@@ -76,11 +76,16 @@ jobs:
         if: runner.os != 'windows'
         run: |
           eval $(luarocks path)
+          echo LUA_PATH=$LUA_PATH >> $GITHUB_ENV
+          echo LUA_CPATH=$LUA_CPATH >> $GITHUB_ENV
+
       - name: Set lua path env vars
         if: runner.os == 'windows'
         shell: cmd
         run: |
           for /f "tokens=*" %%i in ('luarocks path') do %%i
+          ECHO LUA_PATH=%LUA_PATH% >> %GITHUB_ENV%
+          ECHO LUA_CPATH=%LUA_PATH% >> %GITHUB_ENV%
 
       - name: Run Drift tests
         run: |
