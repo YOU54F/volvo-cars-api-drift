@@ -36,7 +36,6 @@ jobs:
         run: |
           npm install -g @pactflow/drift
 
-
       - name: Download and install Drift (win-arm64) # no native win-arm64 drift builds
         if: matrix.os == 'windows-11-arm'
         shell: pwsh
@@ -53,8 +52,28 @@ jobs:
           PACT_BROKER_BASE_URL: ${{ vars.PACT_BROKER_BASE_URL }}
           PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
 
+      - name: Install luarocks (windows)
+        if: runner.os == 'Windows'
+        run: choco install -y luarocks
+      - name: Install luarocks (linux)
+        if: runner.os == 'Linux'
+        run: sudo apt install luarocks
+      - name: Install luarocks (macos)
+        if: runner.os == 'MacOS'
+        run: brew install luarocks
+      - name: Install luarocks deps
+        if: runner.os == 'Linux' || matrix.os == 'macos-15-intel'
+        run: |
+          luarocks path
+          sudo luarocks install dkjson
+      - name: Install luarocks deps
+        if: runner.os != 'Linux' && matrix.os != 'macos-15-intel'
+        run: |
+          luarocks path
+          luarocks install dkjson
+
       - name: Run Drift tests
-        run: drift verify --server-url https://api.volvocars.com/connected-vehicle/v2 --test-files drift/drift.yaml
+        run: drift verify --server-url https://api.volvocars.com/connected-vehicle/v2 --test-files drift/drift.yaml --log-level debug
         env:
           VCC_API_KEY: ${{ secrets.VCC_API_KEY }}
           VCC_TOKEN: ${{ env.VCC_TOKEN }}

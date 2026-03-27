@@ -31,7 +31,9 @@ local exports = {
     -- this event handler allows us to introspect the response on a test case operation 
     ["operation:invoked"] = function(event, data)
       -- Here we want store a variable from the response for use in later requests
-
+        local json = require("dkjson")
+        local payload = {status = "ok"}
+        print(json.encode(payload))
         -- data[0] is the test case operation id, which is unique
         if data[0] == "GetVehicleList_Success" then
           -- data[1] is the response object
