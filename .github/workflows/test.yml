@@ -17,6 +17,7 @@ jobs:
         run: |
           VCC_TOKEN=$(jq -r '.inputs.vcc_token' $GITHUB_EVENT_PATH)
           echo "::add-mask::$VCC_TOKEN"
+          echo VCC_TOKEN=$VCC_TOKEN >> $GITHUB_ENV
 
       - name: Install drift
         run: npm install -g @pactflow/drift
