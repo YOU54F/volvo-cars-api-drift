@@ -25,6 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Create VCC_TOKEN secret environment variable
+        shell: bash
         run: |
           VCC_TOKEN=$(jq -r '.inputs.vcc_token' $GITHUB_EVENT_PATH)
           echo "::add-mask::$VCC_TOKEN"
